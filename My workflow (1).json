@@ -1,0 +1,206 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "1262937e-1ce5-4006-a2f4-336619b77f11",
+      "name": "Telegram Trigger",
+      "webhookId": "fcab75db-337c-4e72-be48-7e9497eac79a",
+      "credentials": {
+        "telegramApi": {
+          "id": "fou4Yudo3Aiue1ww",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "= {{ $('Telegram Trigger').item.json.message.from.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        352,
+        224
+      ],
+      "id": "eb126937-881a-47cc-87e0-d0a2dbf78bb4",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "19zKn8QqfvhcINj7yxUSqKhuaH3w4rBvPeLc7BYkfguQ",
+          "mode": "list",
+          "cachedResultName": "sales_data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19zKn8QqfvhcINj7yxUSqKhuaH3w4rBvPeLc7BYkfguQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1845962234,
+          "mode": "list",
+          "cachedResultName": "Sales Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19zKn8QqfvhcINj7yxUSqKhuaH3w4rBvPeLc7BYkfguQ/edit#gid=1845962234"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        480,
+        224
+      ],
+      "id": "0c76a3bd-e4b0-4e1a-ba41-8f7d6b3bae4a",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "zfvqOEAAhjfVCKwP",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        688,
+        0
+      ],
+      "id": "b5bca9ef-064b-4201-a426-13fe084aa806",
+      "name": "Send a text message",
+      "webhookId": "22e20f6f-8813-4008-bc9c-ead7b132c35e",
+      "credentials": {
+        "telegramApi": {
+          "id": "fou4Yudo3Aiue1ww",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "= {{ $json.message.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        288,
+        0
+      ],
+      "id": "d343a82b-02d6-44d6-bb84-270756e50818",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openrouter/free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        224,
+        224
+      ],
+      "id": "00a4e1bd-82c8-43c4-ba9f-16655c791949",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "FFnU6ZdsoOOa0fvy",
+          "name": "OpenRouter account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "839edcc9-664d-4cf5-9d43-46d0c40b2492",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c8981bf23bcafbd4257470737790ad8cfce46fe707f59f9fa74a4b06f1158416"
+  },
+  "id": "ldy8b06JKKPCQnFc",
+  "tags": []
+}
